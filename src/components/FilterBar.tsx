@@ -82,6 +82,7 @@ export function FilterBar({ filters, onFilterChange, totalCount }: FilterBarProp
           <button
             onClick={toggleSortDirection}
             title={filters.sortDirection === 'asc' ? 'Ordem crescente' : 'Ordem decrescente'}
+            aria-label={filters.sortDirection === 'asc' ? 'Alternar ordem: crescente' : 'Alternar ordem: decrescente'}
             className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors text-gray-600 hover:text-primary"
           >
             {filters.sortDirection === 'asc' ? (
