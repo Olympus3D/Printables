@@ -52,7 +52,9 @@ export async function fetchProducts(): Promise<Product[]> {
     const csv = await response.text();
     return parseCSV(csv);
   } catch (error) {
-    console.error('Error fetching products from Google Sheets:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error fetching products from Google Sheets:', error);
+    }
     // Return mock data when sheets not configured
     return getMockProducts();
   }
