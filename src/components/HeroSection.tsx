@@ -1,7 +1,8 @@
 import { WHATSAPP_NUMBER } from '../config';
 
 export function HeroSection() {
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Gostaria de fazer um orçamento para um item personalizado.')}`;
+  const whatsappMessage = 'Olá! Gostaria de fazer um orçamento para um item personalizado.';
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
   const whatsappContactUrl = `https://wa.me/${WHATSAPP_NUMBER}`;
   const heroBgUrl = `${import.meta.env.BASE_URL}Hero_bg.png`;
 
@@ -10,10 +11,22 @@ export function HeroSection() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage:
-            `linear-gradient(135deg, rgba(84, 18, 152, 0.20) 0%, rgba(103, 31, 166, 0.30) 40%, rgba(104, 31, 165, 0.40) 100%), url('${heroBgUrl}')`,
+          backgroundImage: `url('${heroBgUrl}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+        }}
+      />
+
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle at center, rgba(103, 31, 166, 0.10) 0%, rgba(103, 31, 166, 0.06) 34%, rgba(103, 31, 166, 0.03) 68%, rgba(103, 31, 166, 0) 100%)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          WebkitMaskImage: 'radial-gradient(circle at center, black 0%, black 72%, transparent 100%)',
+          maskImage: 'radial-gradient(circle at center, black 0%, black 72%, transparent 100%)',
         }}
       />
 
@@ -24,7 +37,7 @@ export function HeroSection() {
           peças reais
         </h1>
 
-        <p className="text-base sm:text-lg lg:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto mb-10">
+        <p className="text-base sm:text-lg lg:text-xl text-white leading-relaxed max-w-3xl mx-auto mb-10 font-semibold">
           Seja para decoração, presentes, utilidades ou colecionáveis, produzimos itens em impressão 3D com acabamento premium e prazo rápido.
         </p>
 
@@ -33,7 +46,7 @@ export function HeroSection() {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-md font-semibold text-sm hover:opacity-90 transition-all"
+            className="inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-md font-bold text-sm hover:opacity-90 transition-all"
           >
             Fazer Orçamento
           </a>
@@ -42,7 +55,7 @@ export function HeroSection() {
             href={whatsappContactUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 border-2 border-white/75 text-white px-8 py-4 rounded-md font-semibold text-sm hover:bg-white/10 transition-all"
+            className="inline-flex items-center justify-center gap-2 border-2 border-white/75 text-white/80 px-8 py-4 rounded-md font-bold text-sm hover:bg-white/10 transition-all"
           >
             Falar no WhatsApp <span className="text-base">↗</span>
           </a>
