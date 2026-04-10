@@ -20,6 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          referrerPolicy="no-referrer"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;

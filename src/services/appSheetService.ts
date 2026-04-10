@@ -54,7 +54,9 @@ function normalizeTagList(rawValue: string): string {
 
 function normalizeImageUrl(rawUrl: string): string {
   if (!rawUrl) return '';
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+  // Pass through any absolute URL (any URI scheme: http, https, data, blob, etc.)
+  // or site-absolute paths starting with '/'; only rewrite true relative file paths.
+  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(rawUrl) || rawUrl.startsWith('/')) return rawUrl;
 
   // AppSheet stores images as relative file paths; construct the CDN URL when possible
   if (APPSHEET_APP_NAME && APPSHEET_TABLE_NAME && APPSHEET_ACCESS_KEY) {

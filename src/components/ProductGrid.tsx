@@ -25,16 +25,21 @@ interface ProductGridProps {
 export function ProductGrid({ products, loading, selectedTag = '' }: ProductGridProps) {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [currentPage, setCurrentPage] = useState(1);
+  const [prevTag, setPrevTag] = useState(selectedTag);
 
-  // Stable string key for detecting filter/tag changes (value equality)
-  const filterKey = JSON.stringify(filters) + '|' + selectedTag;
-  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
-
-  // Reset to page 1 when filters or selectedTag change (adjusting state during render)
-  if (prevFilterKey !== filterKey) {
-    setPrevFilterKey(filterKey);
+  // When selectedTag prop changes, reset to page 1 (React "adjusting state during render"
+  // pattern: one comparison variable + two coordinated setState calls; React aborts and
+  // immediately re-renders with the new state, so no extra effect or ref is needed).
+  if (prevTag !== selectedTag) {
+    setPrevTag(selectedTag);
     setCurrentPage(1);
   }
+
+  // Wrap setFilters so filter changes also reset pagination in the event handler.
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
 
   const filtered = useMemo(() => {
     let result = [...products];
@@ -90,7 +95,7 @@ export function ProductGrid({ products, loading, selectedTag = '' }: ProductGrid
   };
 
   return (
-    <section id="catalogo" className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+    <section id="catalogo" className="max-w-7xl mx-auto px-4 md:px-8 py-12 scroll-mt-32">
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Catálogo de Produtos</h2>
         <p className="text-gray-500 mt-1">
@@ -100,7 +105,7 @@ export function ProductGrid({ products, loading, selectedTag = '' }: ProductGrid
 
       <FilterBar
         filters={filters}
-        onFilterChange={setFilters}
+        onFilterChange={handleFilterChange}
         totalCount={filtered.length}
       />
 
