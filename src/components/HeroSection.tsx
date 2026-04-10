@@ -3,6 +3,7 @@ import { WHATSAPP_NUMBER } from '../config';
 export function HeroSection() {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Gostaria de fazer um orçamento para um item personalizado.')}`;
   const whatsappContactUrl = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const heroBgUrl = `${import.meta.env.BASE_URL}Hero_bg.png`;
 
   return (
     <section className="relative min-h-[100svh] w-full overflow-hidden text-white flex items-center justify-center">
@@ -10,7 +11,7 @@ export function HeroSection() {
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(135deg, rgba(84, 18, 152, 0.20) 0%, rgba(103, 31, 166, 0.30) 40%, rgba(104, 31, 165, 0.40) 100%), url('/Hero_bg.png')",
+            `linear-gradient(135deg, rgba(84, 18, 152, 0.20) 0%, rgba(103, 31, 166, 0.30) 40%, rgba(104, 31, 165, 0.40) 100%), url('${heroBgUrl}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

@@ -9,6 +9,7 @@ interface HeaderProps {
 
 export function Header({ tags, selectedTag, onSelectTag }: HeaderProps) {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Gostaria de fazer um pedido.')}`;
+  const logoUrl = `${import.meta.env.BASE_URL}Logo_white.png`;
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export function Header({ tags, selectedTag, onSelectTag }: HeaderProps) {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-10 py-7 flex items-center justify-between">
         <div className="flex items-center gap-3 text-white">
-          <img src="/Logo_white.png" alt="Olympus 3D" className="w-20 h-20 object-contain" />
+          <img src={logoUrl} alt="Olympus 3D" className="w-20 h-20 object-contain" />
           <span className="font-semibold tracking-wide text-sm md:text-base">Olympus 3D</span>
         </div>
 
