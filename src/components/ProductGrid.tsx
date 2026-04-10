@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { Product } from '../types/product';
 import { ProductCard } from './ProductCard';
 import { ProductCardSkeleton } from './ProductCardSkeleton';
 import { FilterBar } from './FilterBar';
 import type { FilterState } from './FilterBar';
 import { Pagination } from './Pagination';
-import { fetchProducts } from '../services/appSheetService';
 
 const ITEMS_PER_PAGE = 30;
 
@@ -17,22 +16,42 @@ const defaultFilters: FilterState = {
   maxPrice: '',
 };
 
-export function ProductGrid() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ProductGridProps {
+  products: Product[];
+  loading: boolean;
+  selectedTag?: string;
+}
+
+export function ProductGrid({ products, loading, selectedTag = '' }: ProductGridProps) {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [currentPage, setCurrentPage] = useState(1);
+  const [prevTag, setPrevTag] = useState(selectedTag);
 
-  useEffect(() => {
-    fetchProducts()
-      .then(({ products }) => {
-        setProducts(products);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // When selectedTag prop changes, reset to page 1 (React "adjusting state during render"
+  // pattern: one comparison variable + two coordinated setState calls; React aborts and
+  // immediately re-renders with the new state, so no extra effect or ref is needed).
+  if (prevTag !== selectedTag) {
+    setPrevTag(selectedTag);
+    setCurrentPage(1);
+  }
+
+  // Wrap setFilters so filter changes also reset pagination in the event handler.
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
 
   const filtered = useMemo(() => {
     let result = [...products];
+
+    if (selectedTag) {
+      result = result.filter((p) =>
+        p.tag
+          .split(', ')
+          .map((t) => t.trim())
+          .includes(selectedTag)
+      );
+    }
 
     if (filters.search.trim()) {
       const q = filters.search.toLowerCase();
@@ -62,12 +81,7 @@ export function ProductGrid() {
     });
 
     return result;
-  }, [products, filters]);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters]);
+  }, [products, filters, selectedTag]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(
@@ -81,15 +95,17 @@ export function ProductGrid() {
   };
 
   return (
-    <section id="catalogo" className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+    <section id="catalogo" className="max-w-7xl mx-auto px-4 md:px-8 py-12 scroll-mt-32">
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Catálogo de Produtos</h2>
-        <p className="text-gray-500 mt-1">Explore nossos produtos impressos em 3D</p>
+        <p className="text-gray-500 mt-1">
+          {selectedTag ? `Categoria: ${selectedTag}` : 'Explore nossos produtos impressos em 3D'}
+        </p>
       </div>
 
       <FilterBar
         filters={filters}
-        onFilterChange={setFilters}
+        onFilterChange={handleFilterChange}
         totalCount={filtered.length}
       />
 
