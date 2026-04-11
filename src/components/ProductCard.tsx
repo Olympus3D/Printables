@@ -14,11 +14,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-      <div className="relative overflow-hidden bg-gray-50 aspect-[4/3]">
+      <div className="w-full aspect-[3/4] overflow-hidden bg-gray-100">
         <img
           src={product.imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover object-top"
           loading="lazy"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
