@@ -1,5 +1,6 @@
 import type { Product } from '../types/product';
 import { APPSHEET_ACCESS_KEY, APPSHEET_ACTION_URL, APPSHEET_APP_NAME, APPSHEET_TABLE_NAME } from '../config';
+import { getFallbackImageDataUrl } from '../utils/image';
 
 type AppSheetRow = Record<string, unknown>;
 
@@ -8,6 +9,31 @@ export interface FetchProductsResult {
 }
 
 let warnedMissingImageConfig = false;
+const ALLOWED_IMAGE_HOSTS = new Set([
+  'appsheet.com',
+  'www.appsheet.com',
+  'placehold.co',
+]);
+
+function isAllowedImageHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return (
+    ALLOWED_IMAGE_HOSTS.has(host) ||
+    host.endsWith('.appsheet.com') ||
+    host.endsWith('.appsheetusercontent.com')
+  );
+}
+
+function toSafeAbsoluteUrl(rawUrl: string): string {
+  try {
+    const url = new URL(rawUrl);
+    if (url.protocol !== 'https:') return '';
+    if (!isAllowedImageHost(url.hostname)) return '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
 
 function normalizeKey(value: string): string {
   return value
@@ -98,10 +124,12 @@ function normalizeImageUrl(rawUrl: string): string {
   if (!value) return '';
 
   // Keep absolute URLs untouched (http/https/data/blob/etc.)
-  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value)) return value;
+  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(value)) {
+    return toSafeAbsoluteUrl(value);
+  }
 
   // Convert protocol-relative URLs to explicit https
-  if (value.startsWith('//')) return `https:${value}`;
+  if (value.startsWith('//')) return toSafeAbsoluteUrl(`https:${value}`);
 
   // AppSheet image columns often return relative paths (with or without leading slash)
   // that must be resolved through gettablefileurl.
@@ -122,7 +150,8 @@ function normalizeImageUrl(rawUrl: string): string {
 
   // AppSheet stores images as relative file paths; construct the CDN URL when possible
   if (normalizedFileName) {
-    return `https://www.appsheet.com/template/gettablefileurl?appName=${encodeURIComponent(APPSHEET_APP_NAME)}&tableName=${encodeURIComponent(APPSHEET_TABLE_NAME)}&fileName=${encodedFileName}&accessKey=${encodeURIComponent(APPSHEET_ACCESS_KEY)}`;
+    const appSheetUrl = `https://www.appsheet.com/template/gettablefileurl?appName=${encodeURIComponent(APPSHEET_APP_NAME)}&tableName=${encodeURIComponent(APPSHEET_TABLE_NAME)}&fileName=${encodedFileName}&accessKey=${encodeURIComponent(APPSHEET_ACCESS_KEY)}`;
+    return toSafeAbsoluteUrl(appSheetUrl);
   }
 
   return value;
@@ -155,7 +184,7 @@ function rowToProduct(row: AppSheetRow, index: number): Product | null {
     id: id || String(index + 1),
     name,
     price: parseNumber(priceRaw),
-    imageUrl: imageUrl || `https://placehold.co/400x300/2F5F73/ffffff?text=${encodeURIComponent(name)}`,
+    imageUrl: imageUrl || getFallbackImageDataUrl(name),
     tag,
     salesCount: Math.trunc(parseNumber(salesCountRaw)),
     description: description || `Produto cadastrado no AppSheet: ${name}`,
@@ -229,6 +258,6 @@ export async function fetchProducts(): Promise<FetchProductsResult> {
     if (import.meta.env.DEV) {
       console.error('Error fetching products from AppSheet:', error);
     }
-    return { products: [] };
+    throw error instanceof Error ? error : new Error('Failed to fetch products from AppSheet');
   }
 }

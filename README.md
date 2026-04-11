@@ -24,13 +24,27 @@ npm run lint     # ESLint
 
 ## Configuracao
 
-Configure o numero do WhatsApp em `src/config.ts` e adicione as credenciais do AppSheet em um arquivo `.env` na raiz do projeto:
+Configure o numero do WhatsApp em `src/config.ts` e copie `.env.example` para `.env` na raiz do projeto:
+
+```bash
+cp .env.example .env
+```
+
+Depois preencha os valores:
 
 ```bash
 VITE_APPSHEET_APP_ID=SEU_APP_ID
 VITE_APPSHEET_TABLE_NAME=Produtos
 VITE_APPSHEET_ACCESS_KEY=SUA_CHAVE_DE_ACESSO
 ```
+
+### Seguranca (frontend-only)
+
+- Este projeto eh estatico e usa AppSheet direto no navegador.
+- Qualquer chave `VITE_*` pode ser extraida por usuarios finais.
+- Use uma chave de baixo privilegio (somente leitura) e rotacione periodicamente.
+- Nunca commite `.env` com credenciais reais.
+- Mantenha no repositorio apenas `.env.example`.
 
 ### AppSheet
 
@@ -52,7 +66,7 @@ Body: { "Action": "Find", "Properties": { ... }, "Rows": [] }
 
 > Se o AppSheet nao estiver configurado ou estiver inacessivel, o site exibe automaticamente produtos de demonstracao com um aviso no topo do catalogo.
 >
-> Importante: a chave do AppSheet no frontend fica exposta no bundle. Para producao, use um backend/proxy para proteger a chave.
+> Importante: a chave do AppSheet no frontend fica exposta no bundle. Se decidir continuar sem backend, trate a chave como publica e de baixo privilegio.
 
 ---
 

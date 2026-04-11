@@ -3,8 +3,9 @@ import type { Product } from '../types/product';
 import { ProductCard } from './ProductCard';
 import { ProductCardSkeleton } from './ProductCardSkeleton';
 import { FilterBar } from './FilterBar';
-import type { FilterState } from './FilterBar';
+import type { FilterState } from '../types/filter';
 import { Pagination } from './Pagination';
+import { parseTags } from '../utils/tags';
 
 const ITEMS_PER_PAGE = 30;
 
@@ -20,9 +21,15 @@ interface ProductGridProps {
   products: Product[];
   loading: boolean;
   selectedTag?: string;
+  onClearSelectedTag?: () => void;
 }
 
-export function ProductGrid({ products, loading, selectedTag = '' }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  loading,
+  selectedTag = '',
+  onClearSelectedTag,
+}: ProductGridProps) {
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [currentPage, setCurrentPage] = useState(1);
   const [prevTag, setPrevTag] = useState(selectedTag);
@@ -43,13 +50,13 @@ export function ProductGrid({ products, loading, selectedTag = '' }: ProductGrid
 
   const filtered = useMemo(() => {
     let result = [...products];
+    const min = filters.minPrice ? parseFloat(filters.minPrice) : NaN;
+    const max = filters.maxPrice ? parseFloat(filters.maxPrice) : NaN;
+    const hasInvalidPriceRange = !isNaN(min) && !isNaN(max) && max < min;
 
     if (selectedTag) {
       result = result.filter((p) =>
-        p.tag
-          .split(', ')
-          .map((t) => t.trim())
-          .includes(selectedTag)
+        parseTags(p.tag).includes(selectedTag)
       );
     }
 
@@ -59,12 +66,10 @@ export function ProductGrid({ products, loading, selectedTag = '' }: ProductGrid
     }
 
     if (filters.minPrice) {
-      const min = parseFloat(filters.minPrice);
       if (!isNaN(min)) result = result.filter((p) => p.price >= min);
     }
 
-    if (filters.maxPrice) {
-      const max = parseFloat(filters.maxPrice);
+    if (filters.maxPrice && !hasInvalidPriceRange) {
       if (!isNaN(max)) result = result.filter((p) => p.price <= max);
     }
 
@@ -94,6 +99,19 @@ export function ProductGrid({ products, loading, selectedTag = '' }: ProductGrid
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const hasSearch = filters.search.trim().length > 0;
+  const hasPriceFilter = Boolean(filters.minPrice || filters.maxPrice);
+  const hasActiveFilters = Boolean(selectedTag || hasSearch || hasPriceFilter);
+  const resetFilters = () => {
+    setFilters(defaultFilters);
+    setCurrentPage(1);
+  };
+
+  const clearSelectedTag = () => {
+    onClearSelectedTag?.();
+    setCurrentPage(1);
+  };
+
   return (
     <section id="catalogo" className="max-w-7xl mx-auto px-4 md:px-8 py-12 scroll-mt-32">
       <div className="mb-8">
@@ -109,19 +127,76 @@ export function ProductGrid({ products, loading, selectedTag = '' }: ProductGrid
         totalCount={filtered.length}
       />
 
+      {hasActiveFilters && (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          {selectedTag && (
+            <button
+              onClick={clearSelectedTag}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+              title="Remover categoria ativa"
+              aria-label="Remover categoria ativa"
+            >
+              Categoria: {selectedTag}
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          {hasSearch && (
+            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+              Busca: "{filters.search.trim()}"
+            </span>
+          )}
+          {hasPriceFilter && (
+            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+              Preço: {filters.minPrice || '0'} até {filters.maxPrice || 'sem limite'}
+            </span>
+          )}
+          <button
+            onClick={resetFilters}
+            className="inline-flex items-center rounded-full border border-gray-300 bg-white px-3 py-1 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-50"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>
       ) : paginated.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-12 text-center text-gray-500 sm:px-8 sm:py-16">
           <svg className="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="text-lg font-medium">Nenhum produto encontrado</p>
-          <p className="text-sm mt-1">Tente ajustar os filtros de busca</p>
+          <p className="text-lg font-semibold text-gray-700">Nenhum produto encontrado</p>
+          {selectedTag ? (
+            <p className="text-sm mt-1">Não há itens disponíveis na categoria "{selectedTag}".</p>
+          ) : hasSearch ? (
+            <p className="text-sm mt-1">Nenhum resultado para "{filters.search.trim()}".</p>
+          ) : (
+            <p className="text-sm mt-1">Tente ajustar ou limpar os filtros aplicados.</p>
+          )}
+
+          <div className="mt-5 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+            {(hasSearch || hasPriceFilter) && (
+              <button
+                onClick={resetFilters}
+                className="inline-flex items-center justify-center rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-900"
+              >
+                Limpar filtros
+              </button>
+            )}
+            {selectedTag && (
+              <button
+                onClick={clearSelectedTag}
+                className="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100"
+              >
+                Ver todas as categorias
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <>

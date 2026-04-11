@@ -1,13 +1,4 @@
-export type SortField = 'name' | 'price' | 'salesCount';
-export type SortDirection = 'asc' | 'desc';
-
-export interface FilterState {
-  search: string;
-  sortField: SortField;
-  sortDirection: SortDirection;
-  minPrice: string;
-  maxPrice: string;
-}
+import type { FilterState, SortField } from '../types/filter';
 
 interface FilterBarProps {
   filters: FilterState;
@@ -18,6 +9,15 @@ interface FilterBarProps {
 export function FilterBar({ filters, onFilterChange, totalCount }: FilterBarProps) {
   const update = (partial: Partial<FilterState>) =>
     onFilterChange({ ...filters, ...partial });
+
+  const min = filters.minPrice ? Number(filters.minPrice) : null;
+  const max = filters.maxPrice ? Number(filters.maxPrice) : null;
+  const hasInvalidPriceRange =
+    min !== null &&
+    max !== null &&
+    Number.isFinite(min) &&
+    Number.isFinite(max) &&
+    max < min;
 
   const toggleSortDirection = () =>
     update({ sortDirection: filters.sortDirection === 'asc' ? 'desc' : 'asc' });
@@ -50,6 +50,8 @@ export function FilterBar({ filters, onFilterChange, totalCount }: FilterBarProp
           <span className="text-gray-500 whitespace-nowrap">Preço:</span>
           <input
             type="number"
+            inputMode="decimal"
+            min={0}
             placeholder="Min"
             value={filters.minPrice}
             onChange={(e) => update({ minPrice: e.target.value })}
@@ -58,6 +60,8 @@ export function FilterBar({ filters, onFilterChange, totalCount }: FilterBarProp
           <span className="text-gray-400">–</span>
           <input
             type="number"
+            inputMode="decimal"
+            min={0}
             placeholder="Max"
             value={filters.maxPrice}
             onChange={(e) => update({ maxPrice: e.target.value })}
@@ -101,6 +105,12 @@ export function FilterBar({ filters, onFilterChange, totalCount }: FilterBarProp
           {totalCount} resultado{totalCount !== 1 ? 's' : ''}
         </div>
       </div>
+
+      {hasInvalidPriceRange && (
+        <p className="mt-3 text-xs font-medium text-red-600">
+          Faixa de preço inválida: o valor máximo deve ser maior ou igual ao mínimo.
+        </p>
+      )}
     </div>
   );
 }

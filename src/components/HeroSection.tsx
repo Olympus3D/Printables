@@ -1,9 +1,8 @@
-import { WHATSAPP_NUMBER } from '../config';
+import { createWhatsAppUrl, getWhatsAppMessage } from '../utils/whatsapp';
 
 export function HeroSection() {
-  const whatsappMessage = 'Olá! Gostaria de fazer um orçamento para um item personalizado.';
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappMessage)}`;
-  const whatsappContactUrl = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const whatsappUrl = createWhatsAppUrl(getWhatsAppMessage('quote'));
+  const whatsappContactUrl = createWhatsAppUrl(getWhatsAppMessage('contact'));
   const heroBgUrl = `${import.meta.env.BASE_URL}Hero_bg.png`;
   const heroBackgroundStyle = {
     backgroundImage: `url('${heroBgUrl}')`,
@@ -44,7 +43,7 @@ export function HeroSection() {
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-md font-bold text-sm hover:opacity-90 transition-all"
           >
-            Fazer Orçamento
+            Solicitar Orçamento
           </a>
 
           <a
@@ -53,7 +52,7 @@ export function HeroSection() {
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 border-2 border-white/75 text-white px-8 py-4 rounded-md font-bold text-sm hover:bg-white/10 transition-all [text-shadow:0_0_10px_rgba(0,0,0,0.5)]"
           >
-            Falar no WhatsApp <span className="text-base">↗</span>
+            Tirar Dúvidas no WhatsApp <span className="text-base">↗</span>
           </a>
         </div>
       </div>

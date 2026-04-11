@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { WHATSAPP_NUMBER } from '../config';
+import { createWhatsAppUrl, getWhatsAppMessage } from '../utils/whatsapp';
 
 interface HeaderProps {
   tags: string[];
@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export function Header({ tags, selectedTag, onSelectTag }: HeaderProps) {
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá! Gostaria de fazer um pedido.')}`;
+  const whatsappUrl = createWhatsAppUrl(getWhatsAppMessage('order'));
   const logoUrl = `${import.meta.env.BASE_URL}Logo_white.png`;
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -116,7 +116,7 @@ export function Header({ tags, selectedTag, onSelectTag }: HeaderProps) {
             className="inline-flex items-center justify-center gap-2 bg-secondary/95 text-primary px-8 py-4 rounded-md font-bold text-sm hover:opacity-90 transition-all"
             
           >
-            Fazer Pedido
+            Fazer pedido
           </a>
         </nav>
 
@@ -126,7 +126,7 @@ export function Header({ tags, selectedTag, onSelectTag }: HeaderProps) {
           rel="noopener noreferrer"
           className="lg:hidden border border-primary/70 text-primary text-xs font-semibold px-3 py-1.5 rounded-md"
         >
-          WhatsApp
+          Pedir
         </a>
       </div>
     </header>

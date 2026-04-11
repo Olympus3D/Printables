@@ -1,7 +1,7 @@
 export function ProductCardSkeleton() {
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col animate-pulse">
-      <div className="aspect-[4/3] bg-gray-200" />
+      <div className="aspect-[3/4] bg-gray-200" />
       <div className="p-4 flex flex-col gap-2">
         <div className="h-4 bg-gray-200 rounded w-3/4" />
         <div className="h-3 bg-gray-200 rounded w-1/2" />

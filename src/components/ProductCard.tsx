@@ -1,20 +1,20 @@
 import type { Product } from '../types/product';
-import { WHATSAPP_NUMBER } from '../config';
+import { createWhatsAppUrl, getWhatsAppMessage } from '../utils/whatsapp';
+import { getFallbackImageDataUrl } from '../utils/image';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const message = `Olá! Tenho interesse no produto: ${product.name}`;
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  const whatsappUrl = createWhatsAppUrl(getWhatsAppMessage('product', product.name));
 
   const formatPrice = (price: number) =>
     price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-      <div className="w-full aspect-[3/4] overflow-hidden bg-gray-100">
+      <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
         <img
           src={product.imageUrl}
           alt={product.name}
@@ -23,7 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.onerror = null;
-            target.src = `https://placehold.co/400x300/2F5F73/ffffff?text=${encodeURIComponent(product.name)}`;
+            target.src = getFallbackImageDataUrl(product.name);
           }}
         />
         {product.tag && (
@@ -37,12 +37,6 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="font-semibold text-gray-800 text-sm leading-snug mb-1 line-clamp-2">
           {product.name}
         </h3>
-
-        {product.tag && (
-          <p className="text-xs font-medium text-primary mb-2 line-clamp-1">
-            {product.tag}
-          </p>
-        )}
 
         <div className="mt-auto pt-3 flex items-end justify-between">
           <div>

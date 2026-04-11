@@ -25,7 +25,10 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
   const btnDisabled = `${btnBase} text-gray-300 cursor-not-allowed border border-gray-100`;
 
   return (
-    <div className="flex items-center justify-center gap-1.5 mt-8">
+    <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+      <span className="mr-1 text-xs font-medium text-gray-500">
+        Página {currentPage} de {totalPages}
+      </span>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
