@@ -4,7 +4,7 @@ interface SplashScreenProps {
   onHide: () => void;
 }
 
-const SPLASH_DISPLAY_DURATION_MS = 1500;
+const SPLASH_DISPLAY_DURATION_MS = 350;
 
 export function SplashScreen({ onHide }: SplashScreenProps) {
   const [fadingOut, setFadingOut] = useState(false);
